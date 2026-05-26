@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoFlow Power Station Selector — เลือกรุ่นที่เหมาะกับคุณ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root {
+    --black: #0A0A0A;
+    --ink: #1A1A1A;
+    --white: #FFFFFF;
+    --bg: #F7F6F2;
+    --bg-card: #FFFFFF;
+    --line: #E5E2DA;
+    --muted: #6B6B6B;
+    --gold: #C9A96E;
+    --gold-dark: #A8884F;
+    --green: #00A878;
+    --red: #E54848;
+    --amber: #F0A030;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Sans Thai', 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 0;
+    min-height: 100vh;
+  }
+  .container { max-width: 980px; margin: 0 auto; padding: 20px 16px 40px; }
+
+  /* HEADER */
+  header.hero {
+    background: var(--black);
+    color: var(--white);
+    padding: 28px 32px;
+    border-radius: 12px 12px 0 0;
+  }
+  .brand { font-size: 26px; font-weight: 700; letter-spacing: 0.5px; }
+  .brand .eco { color: var(--white); }
+  .brand .flow { color: var(--gold); }
+  .tagline { color: #C8C4B8; font-size: 14px; margin-top: 6px; }
+
+  /* GLOSSARY */
+  .glossary-toggle {
+    background: var(--bg-card);
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ink);
+    transition: background 0.15s;
+  }
+  .glossary-toggle:hover { background: #FAF8F2; }
+  .glossary-toggle .chev { transition: transform 0.2s; color: var(--gold); }
+  .glossary-toggle.open .chev { transform: rotate(180deg); }
+  .glossary-body {
+    background: var(--bg-card);
+    padding: 0 20px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s, padding 0.3s;
+    border-bottom: 1px solid var(--line);
+  }
+  .glossary-body.open { max-height: 1400px; padding: 8px 20px 20px; }
+  .glossary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 10px;
+  }
+  .glo-item {
+    background: #FAF8F2;
+    border-left: 3px solid var(--gold);
+    padding: 10px 14px;
+    border-radius: 4px;
+  }
+  .glo-item .term { font-weight: 700; color: var(--black); font-size: 14px; }
+  .glo-item .def { font-size: 13px; color: var(--muted); margin-top: 3px; line-height: 1.55; }
+
+  /* SECTIONS */
+  .section {
+    background: var(--bg-card);
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--line);
+  }
+  .section:last-of-type { border-radius: 0 0 12px 12px; border-bottom: none; }
+  .step-label { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .step-num {
+    background: var(--black);
+    color: var(--gold);
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .step-title { font-size: 17px; font-weight: 700; color: var(--ink); }
+  .step-desc { font-size: 13px; color: var(--muted); margin-top: 3px; margin-bottom: 12px; }
+
+  /* APPLIANCE ROW */
+  .appliance-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 10px;
+  }
+  .appliance-table thead th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--muted);
+    padding: 6px 8px;
+    background: #FAF8F2;
+    border-bottom: 1px solid var(--line);
+  }
+  .appliance-table thead th:first-child { border-radius: 6px 0 0 0; }
+  .appliance-table thead th:last-child { border-radius: 0 6px 0 0; }
+  .appliance-table tbody td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+  }
+  .appliance-table input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1.5px solid var(--line);
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--white);
+    transition: border 0.15s;
+  }
+  .appliance-table input:focus { outline: none; border-color: var(--gold); }
+  .col-name { width: 34%; }
+  .col-watt { width: 18%; }
+  .col-hours { width: 18%; }
+  .col-qty { width: 12%; }
+  .col-subtotal { width: 12%; font-weight: 600; font-size: 12.5px; color: var(--muted); }
+  .col-action { width: 6%; text-align: center; }
+  .btn-row-del {
+    background: transparent;
+    border: none;
+    color: var(--red);
+    font-size: 16px;
+    cursor: pointer;
+    width: 28px; height: 28px;
+    border-radius: 6px;
+  }
+  .btn-row-del:hover { background: #FEE; }
+
+  .row-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+  .btn-add {
+    background: var(--white);
+    border: 1.5px dashed var(--gold);
+    color: var(--gold-dark);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .btn-add:hover { background: #FFF8E8; border-style: solid; }
+
+  /* PRESET CHIPS */
+  .preset-section { margin-top: 14px; }
+  .preset-header { font-size: 12px; color: var(--muted); margin-bottom: 8px; font-weight: 600; }
+  .preset-tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1.5px solid var(--line);
+    margin-bottom: 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .preset-tab {
+    background: transparent;
+    border: none;
+    padding: 8px 14px;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  .preset-tab.active { color: var(--ink); border-bottom-color: var(--gold); }
+  .preset-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .preset-chip {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .preset-chip:hover { background: var(--gold); color: var(--white); border-color: var(--gold); }
+
+  /* STEP 2 — checkboxes */
+  .options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 10px;
+  }
+  .option-card {
+    border: 2px solid var(--line);
+    border-radius: 8px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--white);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .option-card:hover { border-color: var(--gold); background: #FFFDF7; }
+  .option-card.checked { border-color: var(--gold); background: #FFF8E8; }
+  .option-card input { margin-top: 2px; cursor: pointer; transform: scale(1.15); accent-color: var(--gold); }
+  .option-card .lbl { font-weight: 600; color: var(--ink); font-size: 14px; }
+  .option-card .hint { font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.45; }
+
+  /* SOLAR — chips */
+  .solar-section { margin-top: 14px; }
+  .solar-label { font-size: 14px; color: var(--ink); font-weight: 600; margin-bottom: 8px; display: block; }
+  .solar-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .solar-chip {
+    background: var(--bg);
+    border: 1.5px solid var(--line);
+    padding: 7px 13px;
+    border-radius: 999px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    color: var(--ink);
+    transition: all 0.15s;
+  }
+  .solar-chip:hover { background: var(--gold); color: white; border-color: var(--gold); }
+  .solar-chip.active { background: var(--black); color: white; border-color: var(--black); }
+  .solar-custom-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+  .solar-custom-row input {
+    width: 110px;
+    padding: 8px 10px;
+    border: 1.5px solid var(--gold);
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .solar-warning {
+    margin-top: 10px;
+    padding: 9px 13px;
+    background: #FFFBF0;
+    border-left: 3px solid var(--amber);
+    border-radius: 5px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+
+  /* CTA */
+  .btn-calc {
+    width: 100%;
+    background: var(--black);
+    color: var(--white);
+    border: none;
+    padding: 15px;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 18px;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .btn-calc:hover { background: var(--gold-dark); }
+
+  /* RESULTS */
+  #results { display: none; }
+  .summary {
+    background: #FFF8E8;
+    padding: 18px 22px;
+    margin-bottom: 18px;
+    border-radius: 8px;
+    border-left: 4px solid var(--gold);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 14px;
+  }
+  .summary .item .label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  .summary .item .value { font-size: 22px; font-weight: 700; color: var(--black); margin-top: 3px; line-height: 1.1; }
+  .summary .item .value small { font-size: 12px; color: var(--muted); font-weight: 500; }
+
+  .results-h2 { font-size: 17px; margin: 18px 0 12px; color: var(--black); font-weight: 700; }
+
+  .card {
+    border: 2px solid var(--line);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 12px;
+    background: var(--white);
+  }
+  .card.recommended { border-color: var(--green); background: linear-gradient(to right, #F0FFF8, var(--white)); }
+  .card.alternative { border-color: var(--gold); }
+  .card.warn { border-color: var(--amber); background: #FFFBF0; }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .headline {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+  }
+  .card-title { font-size: 20px; font-weight: 700; color: var(--black); }
+  .price-hint { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+  .badge-row { display: flex; gap: 5px; flex-wrap: wrap; }
+  .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+  .badge.green { background: var(--green); color: var(--white); }
+  .badge.gold { background: var(--gold); color: var(--white); }
+  .badge.gray { background: #E5E2DA; color: var(--ink); }
+  .badge.amber { background: var(--amber); color: var(--white); }
+  .badge.red { background: var(--red); color: var(--white); }
+
+  .specs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .spec {
+    background: #FAF8F2;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+  }
+  .spec .k { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; font-weight: 600; }
+  .spec .v { font-size: 13px; font-weight: 700; color: var(--black); margin-top: 2px; }
+
+  .reason {
+    background: #FAF8F2;
+    padding: 12px 14px;
+    border-radius: 6px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.6;
+  }
+  .reason strong { color: var(--black); }
+  .features-list { margin-top: 10px; font-size: 12.5px; color: var(--ink); }
+  .features-list li {
+    list-style: none;
+    padding: 4px 0 4px 20px;
+    position: relative;
+  }
+  .features-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 2px;
+    color: var(--green);
+    font-weight: 700;
+  }
+
+  /* EXPORT */
+  .export-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+  .btn-export {
+    flex: 1;
+    min-width: 180px;
+    background: var(--black);
+    border: 2px solid var(--black);
+    color: var(--white);
+    padding: 12px 16px;
+    border-radius: 7px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 13.5px;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .btn-export:hover { background: var(--gold-dark); border-color: var(--gold-dark); }
+  .btn-export.secondary { background: white; color: var(--ink); }
+  .btn-export.secondary:hover { background: var(--bg); }
+
+  /* No result */
+  .no-result {
+    text-align: left;
+    padding: 22px;
+    color: var(--ink);
+    background: #FFFBF0;
+    border: 2px solid var(--amber);
+    border-radius: 10px;
+  }
+  .no-result h3 { color: var(--ink); margin-bottom: 8px; font-size: 16px; }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 20px 16px;
+    color: var(--muted);
+    font-size: 11.5px;
+    line-height: 1.65;
+  }
+  footer .brand-mini { color: var(--gold-dark); font-weight: 600; }
+  footer a { color: var(--gold-dark); text-decoration: none; font-weight: 600; }
+  footer a:hover { text-decoration: underline; }
+
+  /* RESPONSIVE */
+  @media (max-width: 700px) {
+    header.hero { padding: 22px 18px; }
+    .brand { font-size: 22px; }
+    .section { padding: 18px 16px; }
+    .col-subtotal { display: none; }
+    .appliance-table thead th:nth-child(5) { display: none; }
+    .appliance-table tbody td:nth-child(5) { display: none; }
+    .col-name { width: 36%; }
+    .col-watt, .col-hours, .col-qty { width: 18%; }
+    .appliance-table input { padding: 7px; font-size: 13px; }
+    .glossary-body.open { max-height: 2200px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header class="hero">
+    <div class="brand"><span class="eco">Eco</span><span class="flow">Flow</span> Power Station Selector</div>
+    <p class="tagline">ใส่อุปกรณ์ที่ต้องการใช้ → ระบบเลือกรุ่นที่เหมาะกับคุณ พร้อม Export PDF</p>
+  </header>
+
+  <!-- GLOSSARY -->
+  <div class="glossary-toggle" onclick="toggleGlossary()">
+    <span>📖 ศัพท์ไฟฟ้าพื้นฐาน — W, Wh, V, A, UPS, Stabilizer (กดดู)</span>
+    <span class="chev">▼</span>
+  </div>
+  <div class="glossary-body" id="glossary">
+    <div class="glossary-grid">
+      <div class="glo-item"><div class="term">W (Watt) — แรงไฟ</div><div class="def">"แรงที่เครื่องใช้ตอนทำงาน" ยิ่ง W เยอะ = กินไฟแรง (พัดลม 60W vs หม้อหุงข้าว 800W)</div></div>
+      <div class="glo-item"><div class="term">Wh (Watt-hour) — ขนาดถังไฟ</div><div class="def">"จุไฟไว้ใช้ได้นานแค่ไหน" เครื่อง 100W ใช้ 1 ชม. = กิน 100Wh</div></div>
+      <div class="glo-item"><div class="term">V (Volt) — แรงดันไฟ</div><div class="def">ปลั๊กบ้านไทย 220V — EcoFlow จ่ายออก 220V เสียบใช้ได้ทันที</div></div>
+      <div class="glo-item"><div class="term">A (Amp) — ปริมาณไฟไหล</div><div class="def">สูตร: W = V × A — เช่นเครื่อง 220W ที่ 220V = 1A</div></div>
+      <div class="glo-item"><div class="term">UPS — ระบบสำรองไฟไม่ตัด</div><div class="def">ไฟดับ EcoFlow สลับจ่ายไฟใน &lt;10 ms — คอม/NAS/Server ไม่ดับ</div></div>
+      <div class="glo-item"><div class="term">Stabilizer — ปรับไฟให้นิ่ง</div><div class="def">บ้านไฟไม่นิ่ง EcoFlow มีระบบ regulate ไฟ (เฉพาะรุ่น Air series)</div></div>
+      <div class="glo-item"><div class="term">X-Boost — เทคโนโลยีบูสต์ไฟ</div><div class="def">ขับเครื่องไฟแรงเกินสเปคได้ (เฉพาะฮีตเตอร์ ไม่ใช่มอเตอร์)</div></div>
+      <div class="glo-item"><div class="term">LFP Battery — แบตของ EcoFlow</div><div class="def">Lithium Iron Phosphate ปลอดภัย ไม่ระเบิด อายุ 10 ปี</div></div>
+    </div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="section">
+    <div class="step-label">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">เครื่องใช้ไฟฟ้าที่คุณต้องการใช้</div>
+        <div class="step-desc">ใส่ได้หลายชิ้น — กดปุ่ม Preset เพื่อเติมค่า Watt อัตโนมัติ แล้วกรอกชั่วโมงเอง</div>
+      </div>
+    </div>
+
+    <table class="appliance-table" id="appliance-table">
+      <thead>
+        <tr>
+          <th class="col-name">ชื่อเครื่องใช้ไฟฟ้า</th>
+          <th class="col-watt">Watt (W)</th>
+          <th class="col-hours">ชั่วโมง</th>
+          <th class="col-qty">จำนวน</th>
+          <th class="col-subtotal">รวม Wh</th>
+          <th class="col-action"></th>
+        </tr>
+      </thead>
+      <tbody id="appliance-body"></tbody>
+    </table>
+
+    <div class="row-buttons">
+      <button class="btn-add" onclick="addRow()">+ เพิ่มเครื่องใช้ไฟฟ้า</button>
+      <button class="btn-add" onclick="clearAllRows()" style="border-color:#CCC; color:var(--muted);">ลบทั้งหมด</button>
+    </div>
+
+    <div class="preset-section">
+      <div class="preset-header">⚡ Preset — กดเพื่อเพิ่มเข้า list</div>
+      <div class="preset-tabs" id="preset-tabs"></div>
+      <div class="preset-chips" id="preset-chips"></div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="section">
+    <div class="step-label">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">ความต้องการพิเศษ (ไม่บังคับ)</div>
+        <div class="step-desc">ติ๊กเฉพาะที่คุณต้องการ</div>
+      </div>
+    </div>
+
+    <div class="options-grid">
+      <label class="option-card" data-opt="stabilizer">
+        <input type="checkbox" id="opt-stabilizer">
+        <div>
+          <div class="lbl">⚡ ต้องการ AC Stabilizer (กันไฟตก/กระชาก)</div>
+          <div class="hint">บ้านไฟไม่นิ่ง — ต้องการระบบปรับแรงดันไฟ</div>
+        </div>
+      </label>
+
+      <label class="option-card" data-opt="nas">
+        <input type="checkbox" id="opt-nas">
+        <div>
+          <div class="lbl">💾 ต่อกับ NAS / Server / PC สำคัญ</div>
+          <div class="hint">ไฟดับเครื่องไม่ดับตาม (UPS ≤10ms)</div>
+        </div>
+      </label>
+
+      <label class="option-card" data-opt="outdoor">
+        <input type="checkbox" id="opt-outdoor">
+        <div>
+          <div class="lbl">⛺ พกพา / Outdoor / แคมป์ปิ้ง</div>
+          <div class="hint">น้ำหนักเบา &lt;15 kg ยกขึ้นรถได้</div>
+        </div>
+      </label>
+
+      <label class="option-card" data-opt="expand">
+        <input type="checkbox" id="opt-expand">
+        <div>
+          <div class="lbl">🔄 ต่อ Extra Battery (ขยายในอนาคต)</div>
+          <div class="hint">เผื่อซื้อแบตเสริมเพิ่มทีหลัง</div>
+        </div>
+      </label>
+    </div>
+
+    <div class="solar-section">
+      <label class="solar-label">☀️ มีแผงโซลาร์ที่ต้องต่อ?</label>
+      <div class="solar-chips" id="solar-chips">
+        <button type="button" class="solar-chip active" data-w="0" onclick="setSolar(0)">ไม่มี</button>
+        <button type="button" class="solar-chip" data-w="60" onclick="setSolar(60)">60W</button>
+        <button type="button" class="solar-chip" data-w="110" onclick="setSolar(110)">110W</button>
+        <button type="button" class="solar-chip" data-w="160" onclick="setSolar(160)">160W</button>
+        <button type="button" class="solar-chip" data-w="220" onclick="setSolar(220)">220W</button>
+        <button type="button" class="solar-chip" data-w="400" onclick="setSolar(400)">400W</button>
+        <button type="button" class="solar-chip" data-w="custom" onclick="setSolar('custom')">อื่นๆ...</button>
+      </div>
+      <div class="solar-custom-row" id="solar-custom-row" style="display:none;">
+        <input type="number" id="opt-solar-custom" placeholder="ใส่ Watt" min="0" max="5000" step="10">
+        <span style="font-size:12px; color:var(--muted);">Watt</span>
+      </div>
+      <input type="hidden" id="opt-solar" value="0">
+      <div class="solar-warning">
+        ⚠️ แผงโซลาร์ต้องมี <strong>V (Voltage)</strong> และ <strong>A (Ampere)</strong> ไม่เกินสเปคของรุ่น EcoFlow ที่เลือก — เช็คคู่มือก่อนต่อ
+      </div>
+    </div>
+
+    <button class="btn-calc" onclick="calculate()">วิเคราะห์รุ่นที่เหมาะสมที่สุด</button>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results">
+    <div class="section">
+      <div class="step-label">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-title">ผลลัพธ์ — รุ่นที่แนะนำ</div>
+          <div class="step-desc">เริ่มจากรุ่นเล็กสุดที่ใช้ได้ ตามด้วยทางเลือกเผื่ออนาคต</div>
+        </div>
+      </div>
+
+      <div class="summary" id="summary"></div>
+      <div id="cards"></div>
+
+      <div class="export-bar">
+        <button class="btn-export" onclick="exportPDF()">📄 Export PDF</button>
+        <button class="btn-export secondary" onclick="window.print()">🖨️ Print หน้านี้</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div><span class="brand-mini">EcoFlow Thailand</span> · Trusted by SFG · LINE OA: <a href="https://line.me/R/ti/p/@ecoflowthailand" target="_blank">@ecoflowthailand</a></div>
+  <div style="margin-top:4px;">ราคา · ดูโปรโมชั่นรายเดือน · ติดต่อผู้ขาย</div>
+  <div style="margin-top:4px; font-size:10.5px;">คำนวณเผื่อค่าสูญเสีย 20% — Capacity EcoFlow ใช้ได้จริง = Wh × 0.8</div>
+</footer>
+
+<script>
+/* ========== MODEL DATABASE ========== */
+const MODELS = [
+  // RIVER 3 series
+  { name: "RIVER 3",          cap: 245,  ac: 300,  xboost: 600,  surge: 600,  solar: 110,  weight: 3.5,  outlets: 1,
+    eps_ms: 10, stabilizer: false, nas_native: false, expandable_kwh: 0, expand_note: "ไม่รองรับ", tier: "entry",
+    features: ["น้ำหนัก 3.5 kg พกพาง่าย", "ชาร์จ 0→100% ใน 60 นาที"] },
+  { name: "RIVER 3 Plus",     cap: 286,  ac: 600,  xboost: 1200, surge: 1200, solar: 220,  weight: 4.7,  outlets: 3,
+    eps_ms: 10, stabilizer: false, nas_native: true, expandable_kwh: 0, expand_note: "ขยายได้ — ยังไม่มีขายแยก", tier: "entry",
+    features: ["AC 600W รับเครื่องครัวเบาๆ ได้", "NAS Native + UPS <10ms"] },
+  { name: "RIVER 3 Max",      cap: 572,  ac: 600,  xboost: 1200, surge: 1200, solar: 220,  weight: 8.0,  outlets: 3,
+    eps_ms: 10, stabilizer: false, nas_native: true, expandable_kwh: 0.286, expand_note: "ตัวหลัก 286Wh + ตัวเสริม 286Wh (มาในกล่อง)", tier: "entry",
+    features: ["มาพร้อมแบตเสริม 286Wh", "NAS Native + UPS <10ms"] },
+  { name: "RIVER 3 Max Plus", cap: 858,  ac: 600,  xboost: 1200, surge: 1200, solar: 220,  weight: 11.0, outlets: 3,
+    eps_ms: 10, stabilizer: false, nas_native: true, expandable_kwh: 0.572, expand_note: "ตัวหลัก 286Wh + ตัวเสริม 572Wh (มาในกล่อง)", tier: "mid",
+    features: ["มาพร้อมแบตเสริม 572Wh", "NAS Native + UPS <10ms"] },
+  // DELTA 3 series
+  { name: "DELTA 3",          cap: 1024, ac: 1800, xboost: 3600, surge: 3600, solar: 500,  weight: 12.5, outlets: 4,
+    eps_ms: 10, stabilizer: false, nas_native: false, expandable_kwh: 0, expand_note: "ไม่รองรับ", tier: "mid",
+    features: ["AC 1800W รับเครื่องครัวหลายชิ้น", "X-Boost 3600W · ชาร์จ 0→80% ใน 50 นาที"] },
+  { name: "DELTA 3 Plus",     cap: 1024, ac: 1800, xboost: 3600, surge: 3600, solar: 1000, weight: 12.5, outlets: 4,
+    eps_ms: 10, stabilizer: false, nas_native: true, expandable_kwh: 5, expand_note: "ขยายได้ถึง 5 kWh", tier: "mid",
+    features: ["AC 1800W + X-Boost 3600W", "NAS Native · ต่อ Extra Battery ถึง 5 kWh"] },
+  { name: "DELTA 3 Max",      cap: 2048, ac: 2400, xboost: 3200, surge: 4800, solar: 500,  weight: 22.0, outlets: 4,
+    eps_ms: 10, stabilizer: false, nas_native: false, expandable_kwh: 0, expand_note: "ไม่รองรับ", tier: "high",
+    features: ["Capacity 2 kWh ใช้ทั้งวันได้", "AC 2400W รับแอร์ 12,000 BTU"] },
+  { name: "DELTA 3 Max Plus", cap: 2048, ac: 3000, xboost: 3900, surge: 6000, solar: 1080, weight: 22.1, outlets: 4,
+    eps_ms: 10, stabilizer: false, nas_native: false, expandable_kwh: 6, expand_note: "ขยายได้ถึง 6 kWh", tier: "high",
+    features: ["AC 3000W — ครัวทั้งบ้านพร้อมกัน", "Solar 1080W ชาร์จเร็ว"] },
+  { name: "DELTA 3 Ultra Plus", cap: 3072, ac: 3600, xboost: 4700, surge: 7200, solar: 1600, weight: 33.7, outlets: 5,
+    eps_ms: 10, stabilizer: false, nas_native: false, expandable_kwh: 30, expand_note: "ขยายได้ถึง 30 kWh", tier: "premium",
+    features: ["3 kWh + Expandable ถึง 30 kWh", "AC 3600W · Home Backup-ready"] },
+  { name: "DELTA Pro",        cap: 3600, ac: 3600, xboost: 4500, surge: 7200, solar: 1600, weight: 45.0, outlets: 4,
+    eps_ms: 20, stabilizer: false, nas_native: false, expandable_kwh: 25, expand_note: "ขยายได้ถึง 25 kWh", tier: "premium",
+    features: ["3.6 kWh + Expandable ถึง 25 kWh", "Smart Home Panel"] },
+  // Air series
+  { name: "DELTA 3 1000 Air", cap: 960,  ac: 500,  xboost: 1000, surge: 1000, solar: 500,  weight: 9.9,  outlets: 3,
+    eps_ms: 10, stabilizer: true, nas_native: false, expandable_kwh: 0, expand_note: "ไม่รองรับ", tier: "entry",
+    features: ["AC Stabilizer ปรับแรงดันไฟ", "เงียบ <39dB · 9.9 kg"] },
+  { name: "DELTA 3 2000 Air", cap: 1920, ac: 1000, xboost: 1500, surge: 2000, solar: 500,  weight: 17.8, outlets: 2,
+    eps_ms: 10, stabilizer: true, nas_native: false, expandable_kwh: 0, expand_note: "ไม่รองรับ", tier: "mid",
+    features: ["AC Stabilizer · Capacity 1920Wh", "ชาร์จ 0→80% ใน 1 ชม. 44 นาที"] }
+];
+
+const USABLE_RATIO = 0.8;
+
+const PRESETS = {
+  "บ้าน": [
+    { n: "พัดลมตั้งพื้น", w: 60 },
+    { n: "พัดลมเพดาน", w: 75 },
+    { n: "ตู้เย็นเล็ก (4-5 คิว)", w: 150 },
+    { n: "ตู้เย็นใหญ่ (15 คิว)", w: 250 },
+    { n: "ทีวี LED 42\"", w: 100 },
+    { n: "ทีวี LED 55\"", w: 140 },
+    { n: "ไฟ LED 1 ดวง", w: 20 }
+  ],
+  "ครัว": [
+    { n: "หม้อหุงข้าว", w: 800 },
+    { n: "ไมโครเวฟ", w: 1000 },
+    { n: "กาน้ำร้อน", w: 1500 },
+    { n: "เตาไฟฟ้า", w: 2000 },
+    { n: "เครื่องชงกาแฟ", w: 1200 },
+    { n: "เครื่องปั่น", w: 600 }
+  ],
+  "IT/Office": [
+    { n: "โน๊ตบุ๊ค", w: 65 },
+    { n: "PC Desktop", w: 400 },
+    { n: "PC Gaming", w: 500 },
+    { n: "WiFi Router", w: 15 },
+    { n: "NAS 4-bay", w: 50 },
+    { n: "จอมอนิเตอร์ 27\"", w: 40 },
+    { n: "Printer", w: 300 }
+  ],
+  "Outdoor": [
+    { n: "โดรนชาร์จ", w: 80 },
+    { n: "กล้อง DSLR ชาร์จ", w: 25 },
+    { n: "ไฟสปอตไลท์", w: 50 },
+    { n: "ปั๊มน้ำเล็ก", w: 750 },
+    { n: "ลำโพง Bluetooth", w: 30 }
+  ],
+  "ทำความร้อน": [
+    { n: "เครื่องทำน้ำอุ่น", w: 3500 },
+    { n: "ฮีตเตอร์", w: 1500 },
+    { n: "เตารีด", w: 1200 }
+  ],
+  "Tools": [
+    { n: "สว่านไฟฟ้า", w: 700 },
+    { n: "เครื่องเชื่อม", w: 3500 },
+    { n: "เลื่อยวงเดือน", w: 1200 },
+    { n: "เครื่องตัดหญ้า", w: 1000 }
+  ]
+};
+
+let currentPresetTab = "บ้าน";
+let rowId = 0;
+
+function init() {
+  initSolar();
+  addRow();
+  renderPresetTabs();
+  renderPresetChips();
+  document.querySelectorAll('.option-card input[type=checkbox]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      cb.closest('.option-card').classList.toggle('checked', cb.checked);
+    });
+  });
+}
+
+function toggleGlossary() {
+  document.querySelector('.glossary-toggle').classList.toggle('open');
+  document.getElementById('glossary').classList.toggle('open');
+}
+
+function setSolar(val) {
+  const customRow = document.getElementById('solar-custom-row');
+  const customInput = document.getElementById('opt-solar-custom');
+  const hiddenInput = document.getElementById('opt-solar');
+  document.querySelectorAll('.solar-chip').forEach(c => {
+    c.classList.toggle('active', String(c.dataset.w) === String(val));
+  });
+  if (val === 'custom') {
+    customRow.style.display = 'flex';
+    customInput.focus();
+    hiddenInput.value = parseFloat(customInput.value) || 0;
+  } else {
+    customRow.style.display = 'none';
+    hiddenInput.value = val;
+  }
+}
+function initSolar() {
+  const customInput = document.getElementById('opt-solar-custom');
+  if (customInput) {
+    customInput.addEventListener('input', e => {
+      document.getElementById('opt-solar').value = parseFloat(e.target.value) || 0;
+    });
+  }
+}
+
+function addRow(prefill) {
+  rowId++;
+  const tbody = document.getElementById('appliance-body');
+  const tr = document.createElement('tr');
+  tr.id = `row-${rowId}`;
+  tr.innerHTML = `
+    <td class="col-name"><input type="text" placeholder="เช่น ตู้เย็น" data-k="name" value="${prefill?.n || ''}"></td>
+    <td class="col-watt"><input type="number" placeholder="0" min="0" data-k="watt" value="${prefill?.w || ''}"></td>
+    <td class="col-hours"><input type="number" placeholder="0" min="0" step="0.1" data-k="hours" value=""></td>
+    <td class="col-qty"><input type="number" placeholder="1" min="1" data-k="qty" value="1"></td>
+    <td class="col-subtotal" data-subtotal>—</td>
+    <td class="col-action"><button class="btn-row-del" onclick="delRow(${rowId})" title="ลบ">✕</button></td>
+  `;
+  tbody.appendChild(tr);
+  tr.querySelectorAll('input').forEach(inp => inp.addEventListener('input', () => updateSubtotal(tr)));
+  updateSubtotal(tr);
+}
+function delRow(id) {
+  const tr = document.getElementById(`row-${id}`);
+  if (tr) tr.remove();
+  if (document.querySelectorAll('#appliance-body tr').length === 0) addRow();
+}
+function clearAllRows() {
+  document.getElementById('appliance-body').innerHTML = '';
+  addRow();
+}
+function updateSubtotal(tr) {
+  const w = parseFloat(tr.querySelector('[data-k=watt]').value) || 0;
+  const h = parseFloat(tr.querySelector('[data-k=hours]').value) || 0;
+  const q = parseFloat(tr.querySelector('[data-k=qty]').value) || 1;
+  const wh = w * h * q;
+  tr.querySelector('[data-subtotal]').textContent = wh > 0 ? wh.toFixed(0) + ' Wh' : '—';
+}
+
+function renderPresetTabs() {
+  const tabs = document.getElementById('preset-tabs');
+  tabs.innerHTML = '';
+  Object.keys(PRESETS).forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'preset-tab' + (cat === currentPresetTab ? ' active' : '');
+    btn.textContent = cat;
+    btn.onclick = () => { currentPresetTab = cat; renderPresetTabs(); renderPresetChips(); };
+    tabs.appendChild(btn);
+  });
+}
+function renderPresetChips() {
+  const chips = document.getElementById('preset-chips');
+  chips.innerHTML = '';
+  PRESETS[currentPresetTab].forEach(p => {
+    const c = document.createElement('button');
+    c.className = 'preset-chip';
+    c.textContent = `${p.n} · ${p.w}W`;
+    c.onclick = () => addRow(p);
+    chips.appendChild(c);
+  });
+}
+
+function readInputs() {
+  const rows = [];
+  document.querySelectorAll('#appliance-body tr').forEach(tr => {
+    const name = tr.querySelector('[data-k=name]').value.trim();
+    const w = parseFloat(tr.querySelector('[data-k=watt]').value) || 0;
+    const h = parseFloat(tr.querySelector('[data-k=hours]').value) || 0;
+    const q = parseFloat(tr.querySelector('[data-k=qty]').value) || 1;
+    if (w > 0 && h > 0) rows.push({ name: name || 'เครื่องใช้ไฟฟ้า', w, h, q });
+  });
+  return {
+    rows,
+    stabilizer: document.getElementById('opt-stabilizer').checked,
+    nas: document.getElementById('opt-nas').checked,
+    outdoor: document.getElementById('opt-outdoor').checked,
+    expand: document.getElementById('opt-expand').checked,
+    solar: parseFloat(document.getElementById('opt-solar').value) || 0
+  };
+}
+
+function calculate() {
+  const inp = readInputs();
+  if (inp.rows.length === 0) {
+    alert('กรุณาใส่อย่างน้อย 1 เครื่องใช้ไฟฟ้า (ทั้ง Watt และชั่วโมง)');
+    return;
+  }
+
+  const totalRunningW = inp.rows.reduce((s, r) => s + r.w * r.q, 0);
+  const maxSingleW = Math.max(...inp.rows.map(r => r.w));
+  const totalWh = inp.rows.reduce((s, r) => s + r.w * r.h * r.q, 0);
+  const requiredCap = totalWh / USABLE_RATIO;
+  const peakW = totalRunningW;
+  const surgeMaxW = maxSingleW * 2;
+
+  const evaluated = MODELS.map(m => {
+    const usableCap = m.cap * USABLE_RATIO;
+    const acOK = m.ac >= peakW;
+    const xboostOK = m.xboost > 0 && m.xboost >= peakW;
+    const capOK = usableCap >= totalWh;
+    const stabilizerOK = inp.stabilizer ? m.stabilizer === true : true;
+    const nasOK = inp.nas ? m.eps_ms <= 10 : true;
+    const outdoorOK = inp.outdoor ? (m.weight < 15) : true;
+    const expandOK = inp.expand ? (m.expandable_kwh > 0) : true;
+    const solarOK = inp.solar > 0 ? (m.solar >= inp.solar) : true;
+
+    const realHours = usableCap / Math.max(peakW, 1);
+    const hardPass = stabilizerOK && nasOK && expandOK && outdoorOK && solarOK;
+
+    let status, reason, badge;
+    if (hardPass && acOK && capOK) {
+      status = "perfect";
+      reason = `รับ ${peakW.toFixed(0)}W (AC ${m.ac}W) · Capacity ${m.cap}Wh ใช้ได้ ~${realHours.toFixed(1)} ชม.`;
+      badge = { txt: "เหมาะที่สุด", cls: "green" };
+    } else if (hardPass && xboostOK && capOK) {
+      status = "xboost";
+      reason = `ใช้ X-Boost (${m.xboost}W) — เฉพาะฮีตเตอร์ ไม่เหมาะมอเตอร์`;
+      badge = { txt: "ใช้ X-Boost", cls: "amber" };
+    } else {
+      status = "fail";
+      reason = '';
+      badge = { txt: "ไม่ตรงสเปค", cls: "red" };
+    }
+    return { ...m, status, reason, badge, realHours, usableCap };
+  });
+
+  const fits = evaluated.filter(m => m.status === "perfect").sort((a, b) => a.cap - b.cap);
+  const xboosts = evaluated.filter(m => m.status === "xboost").sort((a, b) => a.cap - b.cap);
+
+  // Summary
+  document.getElementById('summary').innerHTML = `
+    <div class="item"><div class="label">กำลังไฟรวม</div><div class="value">${peakW.toFixed(0)} <small>W</small></div></div>
+    <div class="item"><div class="label">พลังงานใช้จริง</div><div class="value">${Math.ceil(totalWh)} <small>Wh</small></div></div>
+    <div class="item"><div class="label">EcoFlow ต้องมี ≥</div><div class="value">${Math.ceil(requiredCap)} <small>Wh</small></div></div>
+    <div class="item"><div class="label">จำนวนเครื่อง</div><div class="value">${inp.rows.length} <small>ชิ้น</small></div></div>
+  `;
+
+  const cards = document.getElementById('cards');
+  cards.innerHTML = '';
+
+  if (fits.length === 0 && xboosts.length === 0) {
+    cards.innerHTML = buildNoMatchHTML(inp, peakW, totalWh, requiredCap);
+  } else {
+    if (fits.length > 0) {
+      cards.appendChild(buildCard(fits[0], "✓ แนะนำที่สุด — เหมาะกับคุณ", "recommended"));
+      if (fits[1]) cards.appendChild(buildCard(fits[1], "ทางเลือก — ใหญ่ขึ้นเผื่ออนาคต", "alternative"));
+      if (fits[2]) cards.appendChild(buildCard(fits[2], "ทางเลือก — สำหรับใช้งานหนัก", "alternative"));
+    }
+    if (fits.length === 0 && xboosts.length > 0) {
+      cards.appendChild(buildCard(xboosts[0], "⚠ ใช้ผ่าน X-Boost (เฉพาะฮีตเตอร์)", "warn"));
+      if (xboosts[1]) cards.appendChild(buildCard(xboosts[1], "ทางเลือก — ใช้ X-Boost ใหญ่ขึ้น", "alternative"));
+    }
+  }
+
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  window._lastResult = { inp, peakW, totalWh, requiredCap, fits, xboosts };
+}
+
+function buildNoMatchHTML(inp, peakW, totalWh, requiredCap) {
+  const conds = [];
+  if (inp.stabilizer) conds.push({ label: "AC Stabilizer", filter: m => m.stabilizer });
+  if (inp.nas) conds.push({ label: "UPS ≤10ms (NAS)", filter: m => m.eps_ms <= 10 });
+  if (inp.outdoor) conds.push({ label: "น้ำหนัก <15kg (Outdoor)", filter: m => m.weight < 15 });
+  if (inp.expand) conds.push({ label: "ต่อ Extra Battery", filter: m => m.expandable_kwh > 0 });
+  if (inp.solar > 0) conds.push({ label: `Solar Input ≥${inp.solar}W`, filter: m => m.solar >= inp.solar });
+
+  const condClauses = [];
+  if (inp.outdoor) condClauses.push('น้ำหนัก &lt;15kg');
+  if (inp.stabilizer) condClauses.push('มีระบบทำไฟนิ่ง (Stabilizer)');
+  if (inp.nas) condClauses.push('เลี้ยง NAS ปลอดภัย (UPS ≤10ms)');
+  if (inp.expand) condClauses.push('ต่อแบตเสริมได้');
+  if (inp.solar > 0) condClauses.push(`รับแผงโซลาร์ ≥${inp.solar}W`);
+  const condText = condClauses.length > 0 ? ' โดยที่<strong>' + condClauses.join(' และ ') + '</strong>' : '';
+
+  const passUserConds = conds.length > 0 ? MODELS.filter(m => conds.every(c => c.filter(m))) : MODELS;
+  if (passUserConds.length === 0) {
+    return `<div class="no-result">
+      <h3>⛔ เงื่อนไขที่เลือกขัดแย้งกัน</h3>
+      <p>ไม่มี EcoFlow รุ่นใดที่มีคุณสมบัติครบทุกข้อพร้อมกัน — กรุณายกเลิกเงื่อนไขบางข้อ</p>
+    </div>`;
+  }
+
+  const maxAC = Math.max(...passUserConds.map(m => Math.max(m.ac, m.xboost || 0)));
+  const maxCap = Math.max(...passUserConds.map(m => m.cap));
+  const maxUsableCap = maxCap * USABLE_RATIO;
+  const acIssue = maxAC < peakW;
+  const capIssue = maxUsableCap < totalWh;
+
+  let msg = '';
+  if (acIssue && capIssue) {
+    msg = `ไม่มีรุ่นที่<strong>จ่ายไฟพอ ${peakW.toFixed(0)}W</strong> และ<strong>เก็บไฟพอ ${Math.ceil(totalWh)}Wh</strong>${condText}`;
+  } else if (acIssue) {
+    msg = `ไม่มีรุ่นที่<strong>จ่ายไฟพอ ${peakW.toFixed(0)}W</strong>${condText}`;
+  } else if (capIssue) {
+    msg = `ไม่มีรุ่นที่<strong>เก็บไฟพอ ${Math.ceil(totalWh)}Wh</strong>${condText}`;
+  } else {
+    msg = `ไม่ตรงเงื่อนไขเฉพาะ`;
+  }
+
+  return `<div class="no-result">
+    <h3>⚠ ไม่พบรุ่นที่ตรงทุกเงื่อนไข</h3>
+    <p style="margin-top:8px; font-size:14px;">${msg}</p>
+    <p style="margin-top:10px; font-size:13px; color:var(--muted);">ลองยกเลิกเงื่อนไขบางข้อ หรือลดชั่วโมงใช้งาน — หรือ <a href="https://line.me/R/ti/p/@ecoflowthailand" target="_blank" style="color:var(--gold-dark); font-weight:600;">สอบถาม @ecoflowthailand</a></p>
+  </div>`;
+}
+
+function buildCard(m, headline, cls) {
+  const div = document.createElement('div');
+  div.className = `card ${cls}`;
+  const upsLabel = `&lt;${m.eps_ms}ms`;
+  const stabLabel = m.stabilizer ? '✓ มี' : '— ไม่มี';
+  const nasLabel = m.nas_native ? '✓ มี Comm' : '— ไม่มี Comm';
+  const expandLabel = m.expand_note || (m.expandable_kwh > 0 ? `✓ ${m.expandable_kwh} kWh` : '✗ ไม่ได้');
+  const expandColor = m.expandable_kwh > 0 ? 'var(--green)' : 'var(--muted)';
+
+  div.innerHTML = `
+    <div class="card-header">
+      <div>
+        <div class="headline">${headline}</div>
+        <div class="card-title">EcoFlow ${m.name}</div>
+        <div class="price-hint">ราคา · ดูโปรโมชั่นรายเดือน · ติดต่อผู้ขาย</div>
+      </div>
+      <div class="badge-row">
+        <span class="badge ${m.badge.cls}">${m.badge.txt}</span>
+        <span class="badge gray">${m.tier.toUpperCase()}</span>
+      </div>
+    </div>
+    <div class="specs">
+      <div class="spec"><div class="k">Capacity</div><div class="v">${m.cap} Wh</div></div>
+      <div class="spec"><div class="k">AC Output</div><div class="v">${m.ac} W</div></div>
+      <div class="spec"><div class="k">X-Boost</div><div class="v">${m.xboost ? m.xboost + ' W' : '—'}</div></div>
+      <div class="spec"><div class="k">Surge</div><div class="v">${m.surge} W</div></div>
+      <div class="spec"><div class="k">Solar</div><div class="v">${m.solar} W</div></div>
+      <div class="spec"><div class="k">AC Outlet</div><div class="v">${m.outlets} ช่อง</div></div>
+      <div class="spec"><div class="k">น้ำหนัก</div><div class="v">${m.weight} kg</div></div>
+      <div class="spec"><div class="k">UPS</div><div class="v">${upsLabel}</div></div>
+      <div class="spec"><div class="k">Stabilizer</div><div class="v" style="color:${m.stabilizer?'var(--green)':'var(--muted)'}; font-size:12px;">${stabLabel}</div></div>
+      <div class="spec"><div class="k">NAS Native</div><div class="v" style="color:${m.nas_native?'var(--green)':'var(--muted)'}; font-size:12px;">${nasLabel}</div></div>
+      <div class="spec" style="grid-column: span 2;"><div class="k">Extra Battery</div><div class="v" style="color:${expandColor}; font-size:12px;">${expandLabel}</div></div>
+    </div>
+    <div class="reason"><strong>เหตุผล:</strong> ${m.reason}</div>
+    <ul class="features-list">${m.features.map(f => `<li>${f.replace(/<[^>]+>/g,'')}</li>`).join('')}</ul>
+  `;
+  return div;
+}
+
+/* ========== PDF EXPORT ========== */
+async function exportPDF() {
+  const r = window._lastResult;
+  if (!r) { alert('กรุณากดวิเคราะห์ก่อน'); return; }
+  const best = r.fits[0] || r.xboosts[0];
+  if (!best) { alert('ไม่มีรุ่นแนะนำที่จะ export'); return; }
+
+  const today = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const tmp = document.createElement('div');
+  tmp.style.cssText = 'position:fixed; left:-9999px; top:0; width:780px; background:white; font-family:"Noto Sans Thai",sans-serif; color:#1A1A1A; font-size:12px; line-height:1.55;';
+  tmp.innerHTML = `
+    <div style="background:#0A0A0A; color:#FFFFFF; padding:22px 36px;">
+      <table style="width:100%;"><tr>
+        <td style="vertical-align:middle;">
+          <div style="font-size:28px; font-weight:700; line-height:1;"><span>Eco</span><span style="color:#C9A96E;">Flow</span></div>
+          <div style="color:#C8C4B8; font-size:9.5px; letter-spacing:2px; margin-top:5px; text-transform:uppercase;">Power Station Recommendation</div>
+        </td>
+        <td style="vertical-align:middle; text-align:right; color:#C8C4B8; font-size:11px;">${today}</td>
+      </tr></table>
+    </div>
+    <div style="padding:24px 36px 28px 36px;">
+      <div style="font-size:10px; color:#6B6B6B; text-transform:uppercase; letter-spacing:1.5px; font-weight:700; padding-bottom:6px; border-bottom:1.5px solid #0A0A0A;">ความต้องการ</div>
+      <table style="width:100%; margin:10px 0 18px 0;">
+        <tr>
+          <td style="padding:6px 12px 6px 0; width:33%;">
+            <div style="font-size:9px; color:#6B6B6B; text-transform:uppercase; letter-spacing:1px;">กำลังไฟรวม</div>
+            <div style="font-size:22px; font-weight:700;">${r.peakW.toFixed(0)}<span style="font-size:12px; color:#6B6B6B; margin-left:4px;">W</span></div>
+          </td>
+          <td style="padding:6px 12px; width:33%; border-left:1px solid #E5E2DA;">
+            <div style="font-size:9px; color:#6B6B6B; text-transform:uppercase; letter-spacing:1px;">พลังงานใช้จริง</div>
+            <div style="font-size:22px; font-weight:700;">${Math.ceil(r.totalWh)}<span style="font-size:12px; color:#6B6B6B; margin-left:4px;">Wh</span></div>
+          </td>
+          <td style="padding:6px 0 6px 12px; width:34%; border-left:1px solid #E5E2DA;">
+            <div style="font-size:9px; color:#6B6B6B; text-transform:uppercase; letter-spacing:1px;">EcoFlow ต้องมี ≥</div>
+            <div style="font-size:22px; font-weight:700; color:#C9A96E;">${Math.ceil(r.requiredCap)}<span style="font-size:12px; color:#6B6B6B; margin-left:4px;">Wh</span></div>
+          </td>
+        </tr>
+      </table>
+      <div style="font-size:11px; color:#6B6B6B; padding-bottom:18px; border-bottom:1px solid #E5E2DA;">
+        <strong style="color:#1A1A1A;">อุปกรณ์:</strong> ${r.inp.rows.map(x => `${x.name} (${x.w}W × ${x.h}ชม. × ${x.q})`).join(' · ')}
+      </div>
+
+      <div style="font-size:10px; color:#6B6B6B; text-transform:uppercase; letter-spacing:1.5px; font-weight:700; margin-top:20px; padding-bottom:6px; border-bottom:1.5px solid #0A0A0A;">รุ่นที่แนะนำ</div>
+      <div style="background:#0A0A0A; color:#FFFFFF; padding:18px 24px; margin:14px 0;">
+        <div style="font-size:10px; color:#C8C4B8; letter-spacing:2px; text-transform:uppercase;">EcoFlow</div>
+        <div style="font-size:28px; font-weight:700; margin-top:3px;">${best.name}</div>
+        <div style="color:#C9A96E; font-size:11px; margin-top:8px;">ราคา · ดูโปรโมชั่นรายเดือน · ติดต่อผู้ขาย</div>
+      </div>
+
+      <table style="width:100%; border-collapse:collapse; font-size:11.5px; margin-bottom:14px;">
+        <tr style="border-bottom:1px solid #E5E2DA;"><td style="padding:7px 0; width:22%; color:#6B6B6B;">Capacity</td><td style="padding:7px 0; width:28%; font-weight:600;">${best.cap} Wh</td><td style="padding:7px 12px; width:22%; color:#6B6B6B; border-left:1px solid #E5E2DA;">AC Output</td><td style="padding:7px 0; width:28%; font-weight:600;">${best.ac} W</td></tr>
+        <tr style="border-bottom:1px solid #E5E2DA;"><td style="padding:7px 0; color:#6B6B6B;">X-Boost</td><td style="padding:7px 0; font-weight:600;">${best.xboost ? best.xboost + ' W' : '—'}</td><td style="padding:7px 12px; color:#6B6B6B; border-left:1px solid #E5E2DA;">Surge Power</td><td style="padding:7px 0; font-weight:600;">${best.surge} W</td></tr>
+        <tr style="border-bottom:1px solid #E5E2DA;"><td style="padding:7px 0; color:#6B6B6B;">Solar Input</td><td style="padding:7px 0; font-weight:600;">${best.solar} W</td><td style="padding:7px 12px; color:#6B6B6B; border-left:1px solid #E5E2DA;">UPS Switchover</td><td style="padding:7px 0; font-weight:600;">&lt;${best.eps_ms} ms</td></tr>
+        <tr style="border-bottom:1px solid #E5E2DA;"><td style="padding:7px 0; color:#6B6B6B;">น้ำหนัก</td><td style="padding:7px 0; font-weight:600;">${best.weight} kg</td><td style="padding:7px 12px; color:#6B6B6B; border-left:1px solid #E5E2DA;">AC Outlets</td><td style="padding:7px 0; font-weight:600;">${best.outlets} ช่อง</td></tr>
+        <tr style="border-bottom:1px solid #E5E2DA;"><td style="padding:7px 0; color:#6B6B6B;">AC Stabilizer</td><td style="padding:7px 0; font-weight:600;">${best.stabilizer ? 'มี' : 'ไม่มี'}</td><td style="padding:7px 12px; color:#6B6B6B; border-left:1px solid #E5E2DA;">NAS Native</td><td style="padding:7px 0; font-weight:600;">${best.nas_native ? 'มี' : 'ไม่มี'}</td></tr>
+        <tr><td style="padding:7px 0; color:#6B6B6B;">Extra Battery</td><td colspan="3" style="padding:7px 0; font-weight:600;">${(best.expand_note || (best.expandable_kwh > 0 ? 'ต่อขยายได้ ' + best.expandable_kwh + ' kWh' : 'ไม่รองรับ')).replace(/✓|✗/g,'').trim()}</td></tr>
+      </table>
+
+      <div style="border-left:3px solid #C9A96E; padding:8px 14px; background:#FAF8F2; margin-bottom:14px;">
+        <div style="font-size:9px; color:#6B6B6B; text-transform:uppercase; letter-spacing:1.2px; font-weight:700;">เหตุผลที่เหมาะสม</div>
+        <div style="font-size:12px; margin-top:3px;">${best.reason.replace(/<[^>]+>/g,'')}</div>
+      </div>
+
+      <div style="font-size:9px; color:#6B6B6B; text-transform:uppercase; letter-spacing:1.5px; font-weight:700; margin-top:18px; padding-bottom:6px; border-bottom:1.5px solid #0A0A0A;">การรับประกัน</div>
+      <table style="width:100%; font-size:11px; line-height:1.7; margin-top:8px;">
+        <tr style="border-bottom:1px solid #F0EDE3;"><td style="padding:4px 0;">Power Station · Delta 3 / Plus / Max / Max Plus / Ultra Plus / Pro</td><td style="padding:4px 0; font-weight:700; text-align:right;">5 ปี</td></tr>
+        <tr style="border-bottom:1px solid #F0EDE3;"><td style="padding:4px 0;">River 3 / Delta 3 Air 1000 / Delta 3 Air 2000</td><td style="padding:4px 0; font-weight:700; text-align:right;">2 ปี</td></tr>
+        <tr style="border-bottom:1px solid #F0EDE3;"><td style="padding:4px 0;">Solar Panel · Light Weight</td><td style="padding:4px 0; font-weight:700; text-align:right;">5 ปี</td></tr>
+        <tr><td style="padding:4px 0;">Solar Panel · รุ่นปกติ</td><td style="padding:4px 0; font-weight:700; text-align:right;">1 ปี</td></tr>
+      </table>
+
+      <div style="border:1.5px solid #C9A96E; padding:12px 16px; margin-top:16px; font-size:11px; line-height:1.75;">
+        <strong>ขั้นตอนสำคัญหลังซื้อสินค้า</strong><br>
+        1. ลงทะเบียนรับประกัน · LINE OA <strong>@ecoflowthailand</strong><br>
+        2. ลงทะเบียนรับของแถม · LINE OA <strong>@ecoflowthailand</strong> (ของแถมส่งตามที่อยู่ที่ลงทะเบียน)<br>
+        3. แจ้งเคลม / สอบถาม · LINE OA <strong>@ecoflowthailand</strong>
+      </div>
+
+      <div style="border-top:1px solid #E5E2DA; padding-top:12px; margin-top:18px; font-size:10px; color:#6B6B6B;">
+        <strong style="color:#0A0A0A;">EcoFlow Thailand</strong> · Trusted by SFG (Star Fashion Group) · ${today}
+      </div>
+    </div>
+  `;
+  document.body.appendChild(tmp);
+
+  try {
+    const canvas = await html2canvas(tmp, { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' });
+    const img = canvas.toDataURL('image/jpeg', 0.94);
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+    const pdfW = 210, pdfH = 297, marginX = 8, marginY = 8;
+    const availW = pdfW - (marginX * 2), availH = pdfH - (marginY * 2);
+    const imgRatio = canvas.height / canvas.width;
+    let renderW = availW, renderH = renderW * imgRatio;
+    if (renderH > availH) { renderH = availH; renderW = renderH / imgRatio; }
+    pdf.addImage(img, 'JPEG', marginX + (availW - renderW) / 2, marginY, renderW, renderH);
+    pdf.save(`EcoFlow_${best.name.replace(/\s+/g, '_')}_${Date.now()}.pdf`);
+  } catch (e) {
+    alert('Export PDF ไม่สำเร็จ: ' + e.message);
+  } finally {
+    document.body.removeChild(tmp);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
